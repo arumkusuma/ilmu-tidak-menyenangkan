@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematika Ilmu yang Menyenangkan!</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .game-card {
+            background: #ffffff;
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .game-card:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .hidden {
+            display: none;
+        }
+        .answer-btn {
+            background: #ffffff;
+            color: #333;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            border: none;
+            font-size: 18px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .answer-btn:hover {
+            background: #f1c40f;
+            transform: scale(1.1);
+        }
+        .game-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        #question {
+            font-size: 28px;
+            margin: 20px 0;
+        }
+        button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Matematika Ilmu yang Menyenangkan!</h1>
+    <div id="gameSelection" class="game-container">
+        <div class="game-card" onclick="selectGame('Quick Calculation')">Quick Calculation</div>
+    </div>
+    <div id="gamePlay" class="hidden">
+        <h2 id="gameTitle" class="game-header"></h2>
+        <div id="timer">Time: 120s</div>
+        <div id="score">Score: 0</div>
+        <div id="question"></div>
+        <div id="answers"></div>
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 120;
+        let timerInterval;
+
+        function selectGame(gameName) {
+            document.getElementById('gameSelection').classList.add('hidden');
+            document.getElementById('gamePlay').classList.remove('hidden');
+            document.getElementById('gameTitle').innerText = gameName;
+            
+            if (gameName === 'Quick Calculation') {
+                score = 0;
+                timeLeft = 120;
+                document.getElementById('score').innerText = `Score: ${score}`;
+                document.getElementById('timer').innerText = `Time: ${timeLeft}s`;
+                startTimer();
+                generateQuestion();
+            }
+        }
+
+        function goBack() {
+            clearInterval(timerInterval);
+            document.getElementById('gameSelection').classList.remove('hidden');
+            document.getElementById('gamePlay').classList.add('hidden');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('timer').innerText = `Time: ${timeLeft}s`;
+                } else {
+                    clearInterval(timerInterval);
+                    Swal.fire({
+                        icon: 'info',
+                        title: "Time's up!",
+                        text: `Your final score: ${score}`
+                    }).then(() => {
+                        goBack();
+                    });
+                }
+            }, 1000);
+        }
+
+        function generateQuestion() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const operators = ['+', '-', '*', '/'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            let correctAnswer;
+
+            if (operator === '+') correctAnswer = num1 + num2;
+            else if (operator === '-') correctAnswer = num1 - num2;
+            else if (operator === '*') correctAnswer = num1 * num2;
+            else correctAnswer = (num1 / num2).toFixed(2);
+
+            const answers = [correctAnswer, correctAnswer + 1, correctAnswer - 1, correctAnswer + 2];
+            answers.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('question').innerText = `${num1} ${operator} ${num2} = ?`;
+            document.getElementById('answers').innerHTML = '';
+            
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer;
+                button.classList.add('answer-btn');
+                button.onclick = function() {
+                    checkAnswer(parseFloat(answer), parseFloat(correctAnswer));
+                };
+                document.getElementById('answers').appendChild(button);
+            });
+        }
+
+        function checkAnswer(selected, correct) {
+            if (selected === correct) {
+                score++;
+                document.getElementById('score').innerText = `Score: ${score}`;
+                generateQuestion();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Wrong!',
+                    text: 'Try again!'
+                });
+            }
+        }
+    </script>
+</body>
+</html>
